@@ -11,14 +11,14 @@
 }
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
-  if ([@"getWifi" isEqualToString:call.method]) {
+  if ([@"ssid" isEqualToString:call.method]) {
     NSString *wifiName = [self getSSID];
     if ([wifiName isEqualToString: @"Not Found"]) {
       result([FlutterError errorWithCode:@"UNAVAILABLE"
                                  message:@"wifi name unavailable"
                                  details:nil]);
     } else {
-      result(@(wifiName));
+      result(wifiName);
     }
   } else {
     result(FlutterMethodNotImplemented);
