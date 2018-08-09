@@ -26,6 +26,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   String _wifiName = 'click button to get wifi ssid.';
+  String _ip = 'click button to get ip.';
   List ssidList = [];
   String ssid = '', password = '';
 
@@ -65,6 +66,15 @@ class _MyHomePageState extends State<MyHomePage> {
                 onPressed: _getWifiName,
               ),
               Text(_wifiName),
+            ],
+          ),
+          Row(
+            children: <Widget>[
+              RaisedButton(
+                child: Text('ip'),
+                onPressed: _getIP,
+              ),
+              Text(_ip),
             ],
           ),
           TextField(
@@ -117,7 +127,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
- void loadData() {
+  void loadData() {
     Wifi.list('').then((list) {
       setState(() {
         ssidList = list;
@@ -129,6 +139,13 @@ class _MyHomePageState extends State<MyHomePage> {
     String wifiName = await Wifi.ssid;
     setState(() {
       _wifiName = wifiName;
+    });
+  }
+
+  Future<Null> _getIP() async {
+    String ip = await Wifi.ip;
+    setState(() {
+      _ip = ip;
     });
   }
 

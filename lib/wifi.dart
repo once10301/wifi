@@ -9,6 +9,10 @@ class Wifi {
     return await _channel.invokeMethod('ssid');
   }
 
+  static Future<String> get ip async {
+    return await _channel.invokeMethod('ip');
+  }
+
   static Future<T> list<T>(String key) async {
     final Map<String, dynamic> params = {
       'key': key,
