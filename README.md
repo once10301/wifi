@@ -24,9 +24,12 @@ List<String> ssidList = await Wifi.list('key'); // this key is used to filter
 ```
 When you use connection on iOS (iOS 11 only)
 
-1.  'build Phass' -> 'Link Binay With Libraries' add 'NetworkExtension.framework'
+1. 'build Phass' -> 'Link Binay With Libraries' add 'NetworkExtension.framework'
+    ![NetworkExtension](https://github.com/once10301/wifi/blob/master/png/NetworkExtension.png)
 
 2. in 'Capabilities' open 'Hotspot Configuration'
+
+    ![NetworkExtension](https://github.com/once10301/wifi/blob/master/png/Hotspot%20Configuration.png)
 
 
 If you want to use Wifi.list on iOS, 
