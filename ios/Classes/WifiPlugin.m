@@ -1,5 +1,8 @@
 #import "WifiPlugin.h"
 #import <SystemConfiguration/CaptiveNetwork.h>
+#import <ifaddrs.h>
+#import <arpa/inet.h>
+#import <NetworkExtension/NEHotspotConfigurationManager.h>
 
 @implementation WifiPlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
@@ -20,6 +23,25 @@
     } else {
       result(wifiName);
     }
+  } else if ([@"ip" isEqualToString:call.method]) {
+      NSString *ip = [self getIPAddress];
+      if ([ip isEqualToString: @"error"]) {
+          result([FlutterError errorWithCode:@"UNAVAILABLE"
+                                     message:@"wifi name unavailable"
+                                     details:nil]);
+      } else {
+          result(ip);
+      }
+  } else if ([@"connection" isEqualToString:call.method]) {
+      if (@available(iOS 11.0, *)) {
+          NSDictionary* argsMap = call.arguments;
+          NSString *ssid = argsMap[@"ssid"];
+          NSString *password = argsMap[@"password"];
+          NEHotspotConfiguration * hotspotConfig = [[NEHotspotConfiguration alloc] initWithSSID:ssid passphrase:password isWEP:NO];
+          [[NEHotspotConfigurationManager sharedManager] applyConfiguration:hotspotConfig completionHandler:^(NSError * _Nullable error) {
+              result(@NO);
+          }];
+      }
   } else {
     result(FlutterMethodNotImplemented);
   }
@@ -38,4 +60,25 @@
     return ssid;
 }
 
+
+- (NSString *)getIPAddress {
+    NSString *address = @"error";
+    struct ifaddrs *interfaces = NULL;
+    struct ifaddrs *temp_addr = NULL;
+    int success = 0;
+    success = getifaddrs(&interfaces);
+    if (success == 0) {
+        temp_addr = interfaces;
+        while(temp_addr != NULL) {
+            if(temp_addr->ifa_addr->sa_family == AF_INET) {
+                if([[NSString stringWithUTF8String:temp_addr->ifa_name] isEqualToString:@"en0"]){
+                    address = [NSString stringWithUTF8String:inet_ntoa(((struct sockaddr_in *)temp_addr->ifa_addr)->sin_addr)];
+                }
+            }
+            temp_addr = temp_addr->ifa_next;
+        }
+    }
+    freeifaddrs(interfaces);
+    return address;
+}
 @end
