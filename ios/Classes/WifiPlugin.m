@@ -6,49 +6,53 @@
 
 @implementation WifiPlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
-  FlutterMethodChannel* channel = [FlutterMethodChannel
-      methodChannelWithName:@"plugins.ly.com/wifi"
-            binaryMessenger:[registrar messenger]];
-  WifiPlugin* instance = [[WifiPlugin alloc] init];
-  [registrar addMethodCallDelegate:instance channel:channel];
+    FlutterMethodChannel* channel = [FlutterMethodChannel
+                                     methodChannelWithName:@"plugins.ly.com/wifi"
+                                     binaryMessenger:[registrar messenger]];
+    WifiPlugin* instance = [[WifiPlugin alloc] init];
+    [registrar addMethodCallDelegate:instance channel:channel];
 }
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
-  if ([@"ssid" isEqualToString:call.method]) {
-    NSString *wifiName = [self getSSID];
-    if ([wifiName isEqualToString: @"Not Found"]) {
-      result([FlutterError errorWithCode:@"UNAVAILABLE"
-                                 message:@"wifi name unavailable"
-                                 details:nil]);
+    if ([@"ssid" isEqualToString:call.method]) {
+        NSString *wifiName = [self getSSID];
+        if ([wifiName isEqualToString: @"Not Found"]) {
+            result([FlutterError errorWithCode:@"UNAVAILABLE"
+                                       message:@"wifi name unavailable"
+                                       details:nil]);
+        } else {
+            result(wifiName);
+        }
+    } else if ([@"ip" isEqualToString:call.method]) {
+        NSString *ip = [self getIPAddress];
+        if ([ip isEqualToString: @"error"]) {
+            result([FlutterError errorWithCode:@"UNAVAILABLE"
+                                       message:@"wifi name unavailable"
+                                       details:nil]);
+        } else {
+            result(ip);
+        }
+    } else if ([@"connection" isEqualToString:call.method]) {
+        if (@available(iOS 11.0, *)) {
+            NSDictionary* argsMap = call.arguments;
+            NSString *ssid = argsMap[@"ssid"];
+            NSString *password = argsMap[@"password"];
+            NEHotspotConfiguration * hotspotConfig = [[NEHotspotConfiguration alloc] initWithSSID:ssid passphrase:password isWEP:NO];
+            [[NEHotspotConfigurationManager sharedManager] applyConfiguration:hotspotConfig completionHandler:^(NSError * _Nullable error) {
+                if(error == nil){
+                    result(@1);
+                }else{
+                    if(error.code == 13){
+                        result(@2);
+                    } else {
+                        result(@0);
+                    }
+                }
+            }];
+        }
     } else {
-      result(wifiName);
+        result(FlutterMethodNotImplemented);
     }
-  } else if ([@"ip" isEqualToString:call.method]) {
-      NSString *ip = [self getIPAddress];
-      if ([ip isEqualToString: @"error"]) {
-          result([FlutterError errorWithCode:@"UNAVAILABLE"
-                                     message:@"wifi name unavailable"
-                                     details:nil]);
-      } else {
-          result(ip);
-      }
-  } else if ([@"connection" isEqualToString:call.method]) {
-      if (@available(iOS 11.0, *)) {
-          NSDictionary* argsMap = call.arguments;
-          NSString *ssid = argsMap[@"ssid"];
-          NSString *password = argsMap[@"password"];
-          NEHotspotConfiguration * hotspotConfig = [[NEHotspotConfiguration alloc] initWithSSID:ssid passphrase:password isWEP:NO];
-          [[NEHotspotConfigurationManager sharedManager] applyConfiguration:hotspotConfig completionHandler:^(NSError * _Nullable error) {
-              if(error == nil){
-                result(@YES);
-              }else{
-                result(@NO);
-              }
-          }];
-      }
-  } else {
-    result(FlutterMethodNotImplemented);
-  }
 }
 
 - (NSString *) getSSID {
@@ -56,7 +60,7 @@
     CFArrayRef myArray = CNCopySupportedInterfaces();
     if (myArray != nil) {
         CFDictionaryRef myDict = CNCopyCurrentNetworkInfo(CFArrayGetValueAtIndex(myArray, 0));
-       if (myDict != nil) {
+        if (myDict != nil) {
             NSDictionary *dict = (NSDictionary*)CFBridgingRelease(myDict);
             ssid = [dict valueForKey:@"SSID"];
         }
