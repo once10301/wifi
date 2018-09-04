@@ -39,7 +39,11 @@
           NSString *password = argsMap[@"password"];
           NEHotspotConfiguration * hotspotConfig = [[NEHotspotConfiguration alloc] initWithSSID:ssid passphrase:password isWEP:NO];
           [[NEHotspotConfigurationManager sharedManager] applyConfiguration:hotspotConfig completionHandler:^(NSError * _Nullable error) {
-              result(@NO);
+              if(error == nil){
+                result(@YES);
+              }else{
+                result(@NO);
+              }
           }];
       }
   } else {
