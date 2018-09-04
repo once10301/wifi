@@ -20,7 +20,7 @@ class Wifi {
     return await _channel.invokeMethod('list', params);
   }
 
-  static Future<String> connection(String ssid, String password) async {
+  static Future<bool> connection(String ssid, String password) async {
     final Map<String, dynamic> params = {
       'ssid': ssid,
       'password': password,

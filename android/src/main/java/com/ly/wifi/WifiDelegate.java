@@ -188,7 +188,7 @@ public class WifiDelegate implements PluginRegistry.RequestPermissionsResultList
         } else {
             wifiManager.enableNetwork(netId, true);
             wifiManager.reconnect();
-            result.success("success");
+            result.success(true);
             clearMethodCallAndResult();
         }
     }
