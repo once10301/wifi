@@ -2,7 +2,7 @@ name: wifi
 description: Flutter plugin providing WiFi.
 author: Lewis <once10301@gmail.com>
 homepage: https://github.com/once10301/wifi
-version: 0.0.9
+version: 0.0.10
 
 dependencies:
   flutter:

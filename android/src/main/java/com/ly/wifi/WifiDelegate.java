@@ -184,11 +184,11 @@ public class WifiDelegate implements PluginRegistry.RequestPermissionsResultList
         }
         int netId = wifiManager.addNetwork(wifiConfig);
         if (netId == -1) {
-            finishWithError("unavailable", "network status disable");
+            result.success(0);
         } else {
             wifiManager.enableNetwork(netId, true);
             wifiManager.reconnect();
-            result.success(true);
+            result.success(1);
             clearMethodCallAndResult();
         }
     }
