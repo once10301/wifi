@@ -31,6 +31,9 @@ When you use connection on iOS (iOS 11 only)
 
     ![NetworkExtension](https://github.com/once10301/wifi/blob/master/png/Hotspot%20Configuration.png)
 
+3. If you device is iOS12, in 'Capabilities' open 'Access WiFi Information'
+
+    ![NetworkExtension](https://github.com/once10301/wifi/blob/master/png/Access%20WiFi%20Information.png)
 
 If you want to use Wifi.list on iOS, 
 

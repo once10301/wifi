@@ -190,6 +190,9 @@
 						CreatedOnToolsVersion = 7.3.1;
 						DevelopmentTeam = V58DURWDX8;
 						SystemCapabilities = {
+							com.apple.AccessWiFi = {
+								enabled = 1;
+							};
 							com.apple.HotspotConfiguration = {
 								enabled = 1;
 							};
