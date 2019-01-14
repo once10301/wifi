@@ -11,6 +11,7 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.support.v4.app.ActivityCompat;
+import android.util.Log;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -18,6 +19,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 
 import io.flutter.plugin.common.MethodCall;
@@ -77,6 +79,14 @@ public class WifiDelegate implements PluginRegistry.RequestPermissionsResultList
         launchSSID();
     }
 
+    public void getLevel(MethodCall methodCall, MethodChannel.Result result) {
+        if (!setPendingMethodCallAndResult(methodCall, result)) {
+            finishWithAlreadyActiveError();
+            return;
+        }
+        launchLevel();
+    }
+
     private void launchSSID() {
         String wifiName = wifiManager != null ? wifiManager.getConnectionInfo().getSSID().replace("\"", "") : "";
         if (!wifiName.isEmpty()) {
@@ -84,6 +94,24 @@ public class WifiDelegate implements PluginRegistry.RequestPermissionsResultList
             clearMethodCallAndResult();
         } else {
             finishWithError("unavailable", "wifi name not available.");
+        }
+    }
+
+    private void launchLevel() {
+        int level = wifiManager != null ? wifiManager.getConnectionInfo().getRssi() : 0;
+        if (level != 0) {
+            if (level <= 0 && level >= -55) {
+                result.success(3);
+            } else if (level < -55 && level >= -80) {
+                result.success(2);
+            } else if (level < -80 && level >= -100) {
+                result.success(1);
+            } else {
+                result.success(0);
+            }
+            clearMethodCallAndResult();
+        } else {
+            finishWithError("unavailable", "wifi level not available.");
         }
     }
 
@@ -145,20 +173,35 @@ public class WifiDelegate implements PluginRegistry.RequestPermissionsResultList
 
     private void launchWifiList() {
         String key = methodCall.argument("key");
-        List<String> wifiList = new ArrayList<>();
+        List<HashMap> list = new ArrayList<>();
         if (wifiManager != null) {
             List<ScanResult> scanResultList = wifiManager.getScanResults();
             for (ScanResult scanResult : scanResultList) {
+                int level;
+                if (scanResult.level <= 0 && scanResult.level >= -55) {
+                    level = 3;
+                } else if (scanResult.level < -55 && scanResult.level >= -80) {
+                    level = 2;
+                }  else if (scanResult.level < -80 && scanResult.level >= -100) {
+                    level = 1;
+                } else {
+                    level = 0;
+                }
+                HashMap<String, Object> maps = new HashMap<>();
                 if (key.isEmpty()) {
-                    wifiList.add(scanResult.SSID);
+                    maps.put("ssid", scanResult.SSID);
+                    maps.put("level", level);
+                    list.add(maps);
                 } else {
                     if (scanResult.SSID.contains(key)) {
-                        wifiList.add(scanResult.SSID);
+                        maps.put("ssid", scanResult.SSID);
+                        maps.put("level", level);
+                        list.add(maps);
                     }
                 }
             }
         }
-        result.success(wifiList);
+        result.success(list);
         clearMethodCallAndResult();
     }
 

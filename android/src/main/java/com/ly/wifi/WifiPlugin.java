@@ -32,10 +32,12 @@ public class WifiPlugin implements MethodCallHandler {
             result.error("no_activity", "wifi plugin requires a foreground activity.", null);
             return;
         }
-
         switch (call.method) {
             case "ssid":
                 delegate.getSSID(call, result);
+                break;
+            case "level":
+                delegate.getLevel(call, result);
                 break;
             case "ip":
                 delegate.getIP(call, result);

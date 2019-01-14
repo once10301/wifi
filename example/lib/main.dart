@@ -26,8 +26,9 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   String _wifiName = 'click button to get wifi ssid.';
+  int level = 0;
   String _ip = 'click button to get ip.';
-  List ssidList = [];
+  List<WifiResult> ssidList = [];
   String ssid = '', password = '';
 
   @override
@@ -64,6 +65,10 @@ class _MyHomePageState extends State<MyHomePage> {
               RaisedButton(
                 child: Text('ssid'),
                 onPressed: _getWifiName,
+              ),
+              Offstage(
+                offstage: level == 0,
+                child: Image.asset(level == 0 ? 'images/wifi1.png' : 'images/wifi$level.png', width: 28, height: 21),
               ),
               Text(_wifiName),
             ],
@@ -112,9 +117,9 @@ class _MyHomePageState extends State<MyHomePage> {
     } else {
       return Column(children: <Widget>[
         ListTile(
-          leading: Icon(Icons.wifi),
+          leading: Image.asset('images/wifi${ssidList[index - 1].level}.png', width: 28, height: 21),
           title: Text(
-            ssidList[index - 1],
+            ssidList[index - 1].ssid,
             style: TextStyle(
               color: Colors.black87,
               fontSize: 16.0,
@@ -127,7 +132,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void loadData() {
+  void loadData() async {
     Wifi.list('').then((list) {
       setState(() {
         ssidList = list;
@@ -136,8 +141,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<Null> _getWifiName() async {
+    int l = await Wifi.level;
     String wifiName = await Wifi.ssid;
     setState(() {
+      level = l;
       _wifiName = wifiName;
     });
   }

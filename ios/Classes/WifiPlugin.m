@@ -23,6 +23,9 @@
         } else {
             result(wifiName);
         }
+    } else if ([@"level" isEqualToString:call.method]) {
+        NSNumber *level = @([self getSignalStrength]);
+        result(level);
     } else if ([@"ip" isEqualToString:call.method]) {
         NSString *ip = [self getIPAddress];
         if ([ip isEqualToString: @"error"]) {
@@ -68,6 +71,21 @@
     return ssid;
 }
 
+- (int)getSignalStrength{
+    UIApplication *app = [UIApplication sharedApplication];
+    NSArray *subviews = [[[app valueForKey:@"statusBar"] valueForKey:@"foregroundView"] subviews];
+    UIView *dataNetworkItemView = nil;
+    
+    for (UIView * subview in subviews) {
+        if([subview isKindOfClass:[NSClassFromString(@"UIStatusBarDataNetworkItemView") class]]) {
+            dataNetworkItemView = subview;
+            break;
+        }
+    }
+    int signalStrength = [[dataNetworkItemView valueForKey:@"_wifiStrengthBars"] intValue];
+    NSLog(@"signal %d", signalStrength);
+    return signalStrength;
+}
 
 - (NSString *)getIPAddress {
     NSString *address = @"error";
