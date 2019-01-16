@@ -23,7 +23,7 @@ String ip = await Wifi.ip;
 var result = await Wifi.connection('ssid', 'password');
 
 // only work on Android.
-List<String> ssidList = await Wifi.list('key'); // this key is used to filter
+List<WifiResult> list = await Wifi.list('key'); // this key is used to filter
 ```
 When you use connection on iOS (iOS 11 only)
 
