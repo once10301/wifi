@@ -224,31 +224,46 @@ public class WifiDelegate implements PluginRegistry.RequestPermissionsResultList
         boolean hidden = methodCall.argument("hidden");
         WifiConfiguration wifiConfig = createWifiConfig(ssid, password, security, hidden);
         if (wifiConfig == null) {
+            Log.d("connection", "wifi config is null");
             finishWithError("unavailable", "wifi config is null!");
             return;
         }
         int netId = wifiManager.addNetwork(wifiConfig);
-    
-        wifiManager.disconnect();
-        wifiManager.enableNetwork(netId, true);
-        wifiManager.reconnect();
-        result.success(1);
+
+        if (netId != -1) {
+            wifiManager.disconnect();
+            wifiManager.enableNetwork(netId, true);
+            wifiManager.reconnect();
+            result.success(1);
+        } else {
+            Log.d("connection", "call to addNetwork returned -1");
+            result.success(0);
+        }
         clearMethodCallAndResult();
     }
 
     private WifiConfiguration createWifiConfig(String ssid, String password, String security, boolean hidden) {
-        WifiConfiguration config = isExist(wifiManager, ssid);
-        if (config != null) {
-            wifiManager.removeNetwork(config.networkId);
+        WifiConfiguration prevConfig = isExist(wifiManager, ssid);
+        if (prevConfig != null) {
+            Log.d("createWifiConfig", "removing previous config!");
+            Log.d("createWifiConfig", "ssid: " + prevConfig.SSID);
+            Log.d("createWifiConfig", "networkId: " + prevConfig.networkId);
+            if (wifiManager.removeNetwork(prevConfig.networkId)) {
+                Log.d("createWifiConfig", "removed previous config!");
+            } else {
+                Log.d("createWifiConfig", "failed to remove previous config!");
+                return null;
+            }
+            
+        } else {
+            Log.d("createWifiConfig", "no previous config!");
         }
 
-        config = new WifiConfiguration();
-        config.SSID = "\"" + ssid + "\"";
-        config.allowedAuthAlgorithms.clear();
-        config.allowedGroupCiphers.clear();
-        config.allowedKeyManagement.clear();
-        config.allowedPairwiseCiphers.clear();
-        config.allowedProtocols.clear();
+        WifiConfiguration config = new WifiConfiguration();                
+        config.SSID = "\"".concat(ssid).concat("\"");
+        config.status = WifiConfiguration.Status.DISABLED;
+        config.priority = 40;
+
         config.hiddenSSID = hidden;
         switch (security) {
             case "WEP":
