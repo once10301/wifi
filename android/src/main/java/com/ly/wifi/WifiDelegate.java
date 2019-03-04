@@ -12,9 +12,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.os.Build;
-import android.support.v4.app.ActivityCompat;
-import android.util.Log;
+import androidx.core.app.ActivityCompat;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
