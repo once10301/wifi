@@ -12,6 +12,8 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Build;
+
 import androidx.core.app.ActivityCompat;
 
 import java.net.Inet4Address;
@@ -27,7 +29,8 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.PluginRegistry;
 
-public class WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
+public class
+WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
     private Activity activity;
     private WifiManager wifiManager;
     private PermissionManager permissionManager;
