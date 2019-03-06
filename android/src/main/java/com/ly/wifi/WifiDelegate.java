@@ -274,9 +274,11 @@ WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
 
     private WifiConfiguration isExist(WifiManager wifiManager, String ssid) {
         List<WifiConfiguration> existingConfigs = wifiManager.getConfiguredNetworks();
-        for (WifiConfiguration existingConfig : existingConfigs) {
-            if (existingConfig.SSID.equals("\"" + ssid + "\"")) {
-                return existingConfig;
+        if(existingConfigs != null) {
+            for (WifiConfiguration existingConfig : existingConfigs) {
+                if (existingConfig.SSID.equals("\"" + ssid + "\"")) {
+                    return existingConfig;
+                }
             }
         }
         return null;
