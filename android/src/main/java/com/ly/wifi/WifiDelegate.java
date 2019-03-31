@@ -222,6 +222,14 @@ WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
         connection();
     }
 
+    public void disconnect(MethodCall methodCall, MethodChannel.Result result) {
+        if (!setPendingMethodCallAndResult(methodCall, result)) {
+            finishWithAlreadyActiveError();
+            return;
+        }
+        disconnect();
+    }
+
     private void connection() {
         String ssid = methodCall.argument("ssid");
         String password = methodCall.argument("password");
@@ -246,6 +254,22 @@ WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
                 networkReceiver.connect(netId);
             }
         }
+    }
+
+    private void disconnect() {
+        String ssid = methodCall.argument("ssid");
+        WifiConfiguration wifiConfig = createWifiConfig(ssid, "");
+        if (wifiConfig == null) {
+            result.success(1);
+            clearMethodCallAndResult();
+            return;
+        }
+        wifiManager.disconnect();
+        int netId = wifiManager.addNetwork(wifiConfig);
+        wifiManager.disableNetwork(netId);
+        wifiManager.removeNetwork(netId);
+        result.success(1);
+        clearMethodCallAndResult();
     }
 
     private WifiConfiguration createWifiConfig(String ssid, String Password) {
