@@ -30,6 +30,8 @@ class _MyHomePageState extends State<MyHomePage> {
   String _ip = 'click button to get ip.';
   List<WifiResult> ssidList = [];
   String ssid = '', password = '';
+  TextEditingController ssidControler = TextEditingController();
+  TextEditingController passwdControler = TextEditingController();
 
   @override
   void initState() {
@@ -83,6 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
           ),
           TextField(
+            controller: ssidControler,
             decoration: InputDecoration(
               border: UnderlineInputBorder(),
               filled: true,
@@ -96,6 +99,7 @@ class _MyHomePageState extends State<MyHomePage> {
             },
           ),
           TextField(
+            controller: passwdControler,
             decoration: InputDecoration(
               border: UnderlineInputBorder(),
               filled: true,
@@ -112,6 +116,10 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Text('connection'),
             onPressed: connection,
           ),
+          RaisedButton(
+            child: Text('disconnect'),
+            onPressed: disconnect,
+          ),
         ],
       );
     } else {
@@ -126,6 +134,14 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
           dense: true,
+          onTap: () {
+            setState(() {
+              ssidControler.text = ssidList[index -1].ssid;
+              // passwdControler.text = "";
+              ssid = ssidControler.text;
+              // password = passwdControler.text;
+            });
+          },
         ),
         Divider(),
       ]);
@@ -158,6 +174,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<Null> connection() async {
     Wifi.connection(ssid, password).then((v) {
+      print(v);
+    });
+  }
+
+  Future<Null> disconnect() async {
+    Wifi.disconnect(ssid).then((v) {
       print(v);
     });
   }

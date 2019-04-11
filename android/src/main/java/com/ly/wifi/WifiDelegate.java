@@ -8,6 +8,9 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.NetworkRequest;
+import android.net.NetworkCapabilities;
+import android.net.Network;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
@@ -36,6 +39,7 @@ WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
     private PermissionManager permissionManager;
     private static final int REQUEST_ACCESS_FINE_LOCATION_PERMISSION = 1;
     private static final int REQUEST_CHANGE_WIFI_STATE_PERMISSION = 2;
+    private static final int REQUEST_CHANGE_INTERNET_PERMISSION = 3;
     NetworkChangeReceiver networkReceiver;
 
     interface PermissionManager {
@@ -219,7 +223,20 @@ WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
             permissionManager.askForPermission(Manifest.permission.CHANGE_WIFI_STATE, REQUEST_ACCESS_FINE_LOCATION_PERMISSION);
             return;
         }
+        if (!permissionManager.isPermissionGranted(Manifest.permission.INTERNET)) {
+            permissionManager.askForPermission(Manifest.permission.INTERNET, REQUEST_CHANGE_INTERNET_PERMISSION);
+            return;
+        }
+        
         connection();
+    }
+
+    public void disconnect(MethodCall methodCall, MethodChannel.Result result) {
+        if (!setPendingMethodCallAndResult(methodCall, result)) {
+            finishWithAlreadyActiveError();
+            return;
+        }
+        disconnect();
     }
 
     private void connection() {
@@ -241,11 +258,80 @@ WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
                 wifiManager.enableNetwork(netId, true);
                 wifiManager.reconnect();
                 result.success(1);
+                // >> HELBER
+                // ConnectivityManager connection_manager = 
+                // (ConnectivityManager) activity.getApplication().getSystemService(Context.CONNECTIVITY_SERVICE);
+                // NetworkRequest.Builder request = new NetworkRequest.Builder();
+                // request.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
+                // connection_manager.registerNetworkCallback(request.build(), new NetworkCallback() {
+                //     @Override
+                //     public void onAvailable(Network network) {
+                //         ConnectivityManager.setProcessDefaultNetwork(network);
+                //     }
+                // });
+                
+                // final ConnectivityManager manager = (ConnectivityManager) activity.getSystemService(Context.CONNECTIVITY_SERVICE);
+                // NetworkRequest.Builder builder;
+                // builder = new NetworkRequest.Builder();
+                // builder.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
+                // if (manager != null) {
+                //     manager.requestNetwork(builder.build(), new ConnectivityManager.NetworkCallback() {
+                //         @Override
+                //         public void onAvailable(Network network) {
+                //             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                //                 // manager.bindProcessToNetwork(network);
+                //                 boolean result = ConnectivityManager.setProcessDefaultNetwork(network);
+                //                 Log.d("HELBER", "RESULT: "+ result);
+                //                 manager.unregisterNetworkCallback(this);
+                //             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                //                 ConnectivityManager.setProcessDefaultNetwork(network);
+                //                 manager.unregisterNetworkCallback(this);
+                //             }
+                //         }
+                //     });
+                // }
+                // << HELBER
+                // >> Pileggi
+                ConnectivityManager connectivityManager = (ConnectivityManager) activity.getSystemService(Context.CONNECTIVITY_SERVICE);
+                Network etherNetwork = null;
+                for (Network network : connectivityManager.getAllNetworks()) {
+                    NetworkInfo networkInfo = connectivityManager.getNetworkInfo(network);
+                    if (networkInfo.getType() == ConnectivityManager.TYPE_ETHERNET) {
+                        etherNetwork = network;
+                    }
+                }
+                // Android 6
+                Network boundNetwork = connectivityManager.getBoundNetworkForProcess();
+                if (boundNetwork != null) {
+                    NetworkInfo boundNetworkInfo = connectivityManager.getNetworkInfo(boundNetwork);
+                    if (boundNetworkInfo.getType() != ConnectivityManager.TYPE_ETHERNET) {
+                        if (etherNetwork != null) {
+                            connectivityManager.bindProcessToNetwork(etherNetwork);
+                        }
+                    }
+                }
+                // << Pileggi
                 clearMethodCallAndResult();
             } else {
                 networkReceiver.connect(netId);
             }
         }
+    }
+
+    private void disconnect() {
+        String ssid = methodCall.argument("ssid");
+        WifiConfiguration wifiConfig = createWifiConfig(ssid, "");
+        if (wifiConfig == null) {
+            result.success(1);
+            clearMethodCallAndResult();
+            return;
+        }
+        wifiManager.disconnect();
+        int netId = wifiManager.addNetwork(wifiConfig);
+        wifiManager.disableNetwork(netId);
+        wifiManager.removeNetwork(netId);
+        result.success(1);
+        clearMethodCallAndResult();
     }
 
     private WifiConfiguration createWifiConfig(String ssid, String Password) {
@@ -303,6 +389,11 @@ WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
                 }
                 break;
             case REQUEST_CHANGE_WIFI_STATE_PERMISSION:
+                if (permissionGranted) {
+                    connection();
+                }
+                break;
+            case REQUEST_CHANGE_INTERNET_PERMISSION:
                 if (permissionGranted) {
                     connection();
                 }

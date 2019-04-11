@@ -48,6 +48,23 @@ class Wifi {
         return WifiState.error;
     }
   }
+
+  static Future<WifiState> disconnect(String ssid) async {
+    final Map<String, dynamic> params = {
+      'ssid': ssid,
+    };
+    int state = await _channel.invokeMethod('disconnect', params);
+    switch (state) {
+      case 0:
+        return WifiState.error;
+      case 1:
+        return WifiState.success;
+      case 2:
+        return WifiState.already;
+      default:
+        return WifiState.error;
+    }
+  }
 }
 
 class WifiResult {
