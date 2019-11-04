@@ -196,6 +196,7 @@ WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
                 if (key.isEmpty() || scanResult.SSID.contains(key)) {
                     maps.put("ssid", scanResult.SSID);
                     maps.put("level", level);
+                    maps.put("bssid", scanResult.BSSID);
                     list.add(maps);
                 }
             }
