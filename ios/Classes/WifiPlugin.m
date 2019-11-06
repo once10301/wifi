@@ -40,7 +40,12 @@
             NSDictionary* argsMap = call.arguments;
             NSString *ssid = argsMap[@"ssid"];
             NSString *password = argsMap[@"password"];
-            NEHotspotConfiguration * hotspotConfig = [[NEHotspotConfiguration alloc] initWithSSID:ssid passphrase:password isWEP:NO];
+            NEHotspotConfiguration *hotspotConfig;
+            if ([password length] == 0) {
+                hotspotConfig = [[NEHotspotConfiguration alloc] initWithSSID:ssid];
+            } else {
+                hotspotConfig = [[NEHotspotConfiguration alloc] initWithSSID:ssid passphrase:password isWEP:NO];
+            }
             [[NEHotspotConfigurationManager sharedManager] applyConfiguration:hotspotConfig completionHandler:^(NSError * _Nullable error) {
                 if(error == nil){
                     result(@1);
