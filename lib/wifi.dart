@@ -31,11 +31,13 @@ class Wifi {
     return resultList;
   }
 
-  static Future<WifiState> connection(String ssid, String password) async {
+  static Future<WifiState> connection(String ssid, [String password]) async {
     final Map<String, dynamic> params = {
-      'ssid': ssid,
-      'password': password,
+      'ssid': ssid
     };
+    if (password != null && password.isNotEmpty) {
+      params.addEntries([MapEntry('password', password)]);
+    }
     int state = await _channel.invokeMethod('connection', params);
     switch (state) {
       case 0:

@@ -260,11 +260,15 @@ WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
         if (tempConfig != null) {
             wifiManager.removeNetwork(tempConfig.networkId);
         }
-        config.preSharedKey = "\"" + Password + "\"";
+        if (Password != null && !Password.isEmpty()) {
+            config.preSharedKey = "\"" + Password + "\"";
+            config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+        } else {
+            config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+        }
         config.hiddenSSID = true;
         config.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
         config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
-        config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
         config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
         config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
         config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
