@@ -31,10 +31,16 @@ class Wifi {
     return resultList;
   }
 
-  static Future<WifiState> connection(String ssid, String password) async {
+  static Future<WifiState> connection(
+      String ssid,
+      String password,
+      {String security: "WPA", bool hidden: false}
+    ) async {
     final Map<String, dynamic> params = {
       'ssid': ssid,
       'password': password,
+      'security': security,
+      'hidden': hidden
     };
     int state = await _channel.invokeMethod('connection', params);
     switch (state) {

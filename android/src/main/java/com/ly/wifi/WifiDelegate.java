@@ -225,8 +225,11 @@ WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
     private void connection() {
         String ssid = methodCall.argument("ssid");
         String password = methodCall.argument("password");
-        WifiConfiguration wifiConfig = createWifiConfig(ssid, password);
+        String security = methodCall.argument("security");
+        boolean hidden = methodCall.argument("hidden");
+        WifiConfiguration wifiConfig = createWifiConfig(ssid, password, security, hidden);
         if (wifiConfig == null) {
+            Log.d("connection", "wifi config is null");
             finishWithError("unavailable", "wifi config is null!");
             return;
         }
@@ -238,6 +241,7 @@ WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
             // support Android O
             // https://stackoverflow.com/questions/50462987/android-o-wifimanager-enablenetwork-cannot-work
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                wifiManager.disconnect();
                 wifiManager.enableNetwork(netId, true);
                 wifiManager.reconnect();
                 result.success(1);
@@ -248,26 +252,69 @@ WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
         }
     }
 
-    private WifiConfiguration createWifiConfig(String ssid, String Password) {
-        WifiConfiguration config = new WifiConfiguration();
-        config.SSID = "\"" + ssid + "\"";
-        config.allowedAuthAlgorithms.clear();
-        config.allowedGroupCiphers.clear();
-        config.allowedKeyManagement.clear();
-        config.allowedPairwiseCiphers.clear();
-        config.allowedProtocols.clear();
-        WifiConfiguration tempConfig = isExist(wifiManager, ssid);
-        if (tempConfig != null) {
-            wifiManager.removeNetwork(tempConfig.networkId);
+    private WifiConfiguration createWifiConfig(String ssid, String password, String security, boolean hidden) {
+        WifiConfiguration prevConfig = isExist(wifiManager, ssid);
+        if (prevConfig != null) {
+            Log.d("createWifiConfig", "removing previous config!");
+            Log.d("createWifiConfig", "ssid: " + prevConfig.SSID);
+            Log.d("createWifiConfig", "networkId: " + prevConfig.networkId);
+            if (wifiManager.removeNetwork(prevConfig.networkId)) {
+                Log.d("createWifiConfig", "removed previous config!");
+            } else {
+                Log.d("createWifiConfig", "failed to remove previous config!");
+                return null;
+            }
+            
+        } else {
+            Log.d("createWifiConfig", "no previous config!");
         }
-        config.preSharedKey = "\"" + Password + "\"";
-        config.hiddenSSID = true;
-        config.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
-        config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
-        config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
-        config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
-        config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
-        config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+
+        WifiConfiguration config = new WifiConfiguration();                
+        config.SSID = "\"".concat(ssid).concat("\"");
+        config.status = WifiConfiguration.Status.DISABLED;
+        config.priority = 40;
+
+        config.hiddenSSID = hidden;
+        switch (security) {
+            case "WEP":
+                config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+                config.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
+                config.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
+                config.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
+                config.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.SHARED);
+                config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+                config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
+                config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40);
+                config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP104);
+                config.wepKeys[0] = "\"".concat(password).concat("\"");
+                config.wepTxKeyIndex = 0;
+                break;
+            case "WPA":
+                config.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
+                config.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
+                config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+                config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+                config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
+                config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40);
+                config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP104);
+                config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+                config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
+
+                config.preSharedKey = "\"".concat(password).concat("\"");
+                break;
+            default:
+                config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+                config.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
+                config.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
+                config.allowedAuthAlgorithms.clear();
+                config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+                config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
+                config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40);
+                config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP104);
+                config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+                config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
+                break;
+        }
         config.status = WifiConfiguration.Status.ENABLED;
         return config;
     }
