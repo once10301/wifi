@@ -13,7 +13,7 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
-
+import android.content.IntentFilter;
 import androidx.core.app.ActivityCompat;
 
 import java.net.Inet4Address;
@@ -335,7 +335,7 @@ WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
     public class NetworkChangeReceiver extends BroadcastReceiver {
         private int netId;
         private boolean willLink = false;
-
+        public boolean isRegistered;
         @Override
         public void onReceive(Context context, Intent intent) {
             NetworkInfo info = intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
@@ -347,6 +347,28 @@ WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
                 clearMethodCallAndResult();
             }
         }
+        public Intent register(Context context, IntentFilter filter) {
+            try {
+              return !isRegistered 
+                     ? context.registerReceiver(this, filter) 
+                     : null;
+            } finally {
+               isRegistered = true;
+            }
+        }
+        public boolean unregister(Context context) {
+         // additional work match on context before unregister
+         // eg store weak ref in register then compare in unregister 
+         // if match same instance
+             return isRegistered 
+                        && unregisterInternal(context);
+         }
+
+         private boolean unregisterInternal(Context context) {
+             context.unregisterReceiver(this); 
+             isRegistered = false;
+             return true;
+         }
 
         public void connect(int netId) {
             this.netId = netId;
