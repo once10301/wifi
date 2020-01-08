@@ -31,7 +31,7 @@ public class WifiPlugin implements MethodCallHandler {
         IntentFilter filter = new IntentFilter();
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-        delegate.networkReceriver.register(registrar.context(),filter);
+        delegate.networkReceiver.register(registrar.context(),filter);
         channel.setMethodCallHandler(new WifiPlugin(registrar, delegate));
     }
 
