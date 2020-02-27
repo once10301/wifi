@@ -183,6 +183,7 @@ WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
             List<ScanResult> scanResultList = wifiManager.getScanResults();
             for (ScanResult scanResult : scanResultList) {
                 int level;
+                bool secure;
                 if (scanResult.level <= 0 && scanResult.level >= -55) {
                     level = 3;
                 } else if (scanResult.level < -55 && scanResult.level >= -80) {
@@ -192,15 +193,19 @@ WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
                 } else {
                     level = 0;
                 }
+
+                secure = scanResult.capabilities.toLowerCase() == "[ess]";
                 HashMap<String, Object> maps = new HashMap<>();
                 if (key.isEmpty()) {
                     maps.put("ssid", scanResult.SSID);
                     maps.put("level", level);
+                    maps.put("secure",secure);
                     list.add(maps);
                 } else {
                     if (scanResult.SSID.contains(key)) {
                         maps.put("ssid", scanResult.SSID);
                         maps.put("level", level);
+                        maps.put("secure",secure);
                         list.add(maps);
                     }
                 }
