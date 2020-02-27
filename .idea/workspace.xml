@@ -15,9 +15,7 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c7eacce8-361a-426b-909f-bfdff1f38e62" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/lib/wifi.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/wifi.dart" afterDir="false" />
-    </list>
+    <list default="true" id="c7eacce8-361a-426b-909f-bfdff1f38e62" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
