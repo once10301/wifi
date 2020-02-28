@@ -192,15 +192,19 @@ WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
                 } else {
                     level = 0;
                 }
+
+                boolean secure =  scanResult.capabilities.toLowerCase().equals("[ess]");
                 HashMap<String, Object> maps = new HashMap<>();
                 if (key.isEmpty()) {
                     maps.put("ssid", scanResult.SSID);
                     maps.put("level", level);
+                    maps.put("secure",secure);
                     list.add(maps);
                 } else {
                     if (scanResult.SSID.contains(key)) {
                         maps.put("ssid", scanResult.SSID);
                         maps.put("level", level);
+                        maps.put("secure",secure);
                         list.add(maps);
                     }
                 }
