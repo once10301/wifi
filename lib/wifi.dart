@@ -19,6 +19,10 @@ class Wifi {
     return await _channel.invokeMethod('ip');
   }
 
+  static Future<bool> get wifiEnabled async {
+    return await _channel.invokeMethod('wifiEnabled');
+  }
+
   static Future<List<WifiResult>> list(String key) async {
     final Map<String, dynamic> params = {
       'key': key,

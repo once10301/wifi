@@ -128,6 +128,16 @@ WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
         launchIP();
     }
 
+    public void isWifiEnabled(MethodCall methodCall, MethodChannel.Result result) {
+        WifiManager wifiManager = (WifiManager) activity.getApplicationContext()
+                .getSystemService(Context.WIFI_SERVICE);
+        if (wifiManager != null) {
+            result.success(wifiManager.isWifiEnabled());
+        } else {
+            result.error("unavailable", "wifi service not available.", null);
+        }
+    }
+
     private void launchIP() {
         NetworkInfo info = ((ConnectivityManager) activity.getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
         if (info != null && info.isConnected()) {
