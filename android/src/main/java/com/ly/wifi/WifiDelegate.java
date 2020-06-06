@@ -128,6 +128,16 @@ WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
         launchIP();
     }
 
+    public void isWifiEnabled(MethodCall methodCall, MethodChannel.Result result) {
+        WifiManager wifiManager = (WifiManager) activity.getApplicationContext()
+                .getSystemService(Context.WIFI_SERVICE);
+        if (wifiManager != null) {
+            result.success(wifiManager.isWifiEnabled());
+        } else {
+            result.error("unavailable", "wifi service not available.", null);
+        }
+    }
+
     private void launchIP() {
         NetworkInfo info = ((ConnectivityManager) activity.getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
         if (info != null && info.isConnected()) {
@@ -193,16 +203,11 @@ WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
                     level = 0;
                 }
                 HashMap<String, Object> maps = new HashMap<>();
-                if (key.isEmpty()) {
+                if (key.isEmpty() || scanResult.SSID.contains(key)) {
                     maps.put("ssid", scanResult.SSID);
                     maps.put("level", level);
+                    maps.put("bssid", scanResult.BSSID);
                     list.add(maps);
-                } else {
-                    if (scanResult.SSID.contains(key)) {
-                        maps.put("ssid", scanResult.SSID);
-                        maps.put("level", level);
-                        list.add(maps);
-                    }
                 }
             }
         }
@@ -260,11 +265,15 @@ WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
         if (tempConfig != null) {
             wifiManager.removeNetwork(tempConfig.networkId);
         }
-        config.preSharedKey = "\"" + Password + "\"";
+        if (Password != null && !Password.isEmpty()) {
+            config.preSharedKey = "\"" + Password + "\"";
+            config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+        } else {
+            config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+        }
         config.hiddenSSID = true;
         config.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
         config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
-        config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
         config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
         config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
         config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);

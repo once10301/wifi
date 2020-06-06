@@ -19,6 +19,10 @@ class Wifi {
     return await _channel.invokeMethod('ip');
   }
 
+  static Future<bool> get wifiEnabled async {
+    return await _channel.invokeMethod('wifiEnabled');
+  }
+
   static Future<List<WifiResult>> list(String key) async {
     final Map<String, dynamic> params = {
       'key': key,
@@ -26,16 +30,18 @@ class Wifi {
     var results = await _channel.invokeMethod('list', params);
     List<WifiResult> resultList = [];
     for (int i = 0; i < results.length; i++) {
-      resultList.add(WifiResult(results[i]['ssid'], results[i]['level']));
+      resultList.add(WifiResult(results[i]['ssid'], results[i]['level'], results[i]['bssid']));
     }
     return resultList;
   }
 
-  static Future<WifiState> connection(String ssid, String password) async {
+  static Future<WifiState> connection(String ssid, [String password]) async {
     final Map<String, dynamic> params = {
-      'ssid': ssid,
-      'password': password,
+      'ssid': ssid
     };
+    if (password != null && password.isNotEmpty) {
+      params.addEntries([MapEntry('password', password)]);
+    }
     int state = await _channel.invokeMethod('connection', params);
     switch (state) {
       case 0:
@@ -53,6 +59,7 @@ class Wifi {
 class WifiResult {
   String ssid;
   int level;
+  String bssid;
 
-  WifiResult(this.ssid, this.level);
+  WifiResult(this.ssid, this.level, this.bssid);
 }

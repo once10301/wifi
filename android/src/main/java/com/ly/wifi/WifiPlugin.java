@@ -54,6 +54,9 @@ public class WifiPlugin implements MethodCallHandler {
             case "ip":
                 delegate.getIP(call, result);
                 break;
+            case "wifiEnabled":
+                delegate.isWifiEnabled(call, result);
+                break;
             case "list":
                 delegate.getWifiList(call, result);
                 break;
