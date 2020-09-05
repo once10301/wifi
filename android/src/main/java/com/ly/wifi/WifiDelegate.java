@@ -33,6 +33,7 @@ WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
 
   private static final int REQUEST_ACCESS_FINE_LOCATION_PERMISSION = 1;
   private static final int REQUEST_CHANGE_WIFI_STATE_PERMISSION = 2;
+  static final String TAG = "#####################";
   NetworkChangeReceiver networkReceiver;
   private Activity activity;
   private WifiManager wifiManager;
@@ -281,6 +282,7 @@ WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
     }
     int netId = wifiManager.addNetwork(wifiConfig);
     if (netId == -1) {
+      Log.i(TAG,"issue with creating wifi");
       result.success(0);
       clearMethodCallAndResult();
     } else {
@@ -345,6 +347,7 @@ WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
   // https://stackoverflow.com/questions/50462987/android-o-wifimanager-enablenetwork-cannot-work
   public class NetworkChangeReceiver extends BroadcastReceiver {
 
+
     private int netId;
     private boolean willLink = false;
     private boolean isWaiting = false;
@@ -360,8 +363,10 @@ WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
           && result != null) {
 
         if (wifiInfo.getSSID().equals(ssid)) {
+          Log.d(TAG, "Connected Successfully");
           result.success(1);
         } else {
+          Log.d(TAG, "SSID does not match");
           result.success(0);
         }
         isWaiting = false;
@@ -380,6 +385,7 @@ WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
 
 
     }
+
 
     //passing ssid to verify connectivity
     public void connect(int netId, String ssid) {
