@@ -361,6 +361,7 @@ WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
       //check which wifi connectivity and verify ssid
       if (!willLink && wifiInfo.getSupplicantState() == SupplicantState.COMPLETED && isWaiting
           && result != null) {
+        Log.d(TAG, "SSID: " + wifiInfo.getSSID() + ", expected: " + ssid);
 
         if (wifiInfo.getSSID().equals(ssid)) {
           Log.d(TAG, "Connected Successfully");
