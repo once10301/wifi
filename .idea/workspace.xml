@@ -19,6 +19,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c7eacce8-361a-426b-909f-bfdff1f38e62" name="Default" comment="">
+      <change afterPath="$PROJECT_DIR$/example/.flutter-plugins-dependencies" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
@@ -31,7 +32,6 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[/Users/vdis452/.android/avd/Pixel_2_API_29.avd]" />
   <component name="FindInProjectRecents">
     <findStrings>
       <find>account</find>
@@ -135,11 +135,13 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="dart.analysis.tool.window.force.activate" value="false" />
     <property name="io.flutter.reload.alreadyRun" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="flutter.settings" />
     <property name="show.migrate.to.gradle.popup" value="false" />
+    <property name="vue.rearranger.settings.migration" value="true" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -200,6 +202,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1531299112750</updated>
+      <workItem from="1638073166895" duration="8000" />
     </task>
     <task id="LOCAL-00001" summary="add list connection">
       <created>1531893506613</created>
@@ -314,17 +317,6 @@
     <MESSAGE value="iOS connection return WifiState" />
     <MESSAGE value="add signal strength" />
     <option name="LAST_COMMIT_MESSAGE" value="add signal strength" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/android/src/main/java/com/ly/wifi/WifiDelegate.java</url>
-          <line>175</line>
-          <option name="timeStamp" value="3" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
     <entry file="file://F:/flutter/packages/flutter/lib/src/services/message_codecs.dart" />
