@@ -1,6 +1,5 @@
 name: wifi
 description: Modified version of Flutter plugin providing WiFi. original Author Lewis <once10301@gmail.com>
-author: Vipula <vipula803@gmail.com>
 homepage: https://github.com/vipulaSD/wifi
 version: 0.1.6
 
@@ -16,5 +15,3 @@ flutter:
 environment:
   sdk: ">=2.0.0-dev.28.0 <3.0.0"
   flutter: ">=0.1.4 <2.0.0"
-
-publish_to: none
