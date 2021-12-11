@@ -5,25 +5,62 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 
+import androidx.annotation.NonNull;
+
+import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import io.flutter.embedding.engine.plugins.activity.ActivityAware;
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
+import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
-import io.flutter.plugin.common.PluginRegistry.Registrar;
+import io.flutter.plugin.common.PluginRegistry;
 
-public class WifiPlugin implements MethodCallHandler {
-    private final Registrar registrar;
+public class WifiPlugin implements MethodCallHandler, FlutterPlugin, ActivityAware {
+
+    private WifiManager wifiManager;
     private WifiDelegate delegate;
 
-    private WifiPlugin(Registrar registrar, WifiDelegate delegate) {
-        this.registrar = registrar;
-        this.delegate = delegate;
+
+    private WifiPlugin() {
+
     }
 
-    public static void registerWith(Registrar registrar) {
-        final MethodChannel channel = new MethodChannel(registrar.messenger(), "plugins.ly.com/wifi");
-        WifiManager wifiManager = (WifiManager) registrar.activeContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        final WifiDelegate delegate = new WifiDelegate(registrar.activity(), wifiManager);
+    @Override
+    public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
+        delegate = new WifiDelegate(binding.getActivity(), wifiManager);
+        binding.addRequestPermissionsResultListener(delegate);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        binding.getActivity().getApplicationContext().registerReceiver(delegate.networkReceiver, filter);
+
+    }
+
+    @Override
+    public void onAttachedToEngine(@NonNull FlutterPluginBinding binding) {
+        final MethodChannel channel = new MethodChannel(binding.getBinaryMessenger(), "plugins.ly.com/wifi");
+        wifiManager = (WifiManager) binding.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        channel.setMethodCallHandler(new WifiPlugin());
+    }
+
+    @Override
+    public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
+
+    }
+
+    @Deprecated
+    public static void registerWith(PluginRegistry.Registrar registrar) {
+        BinaryMessenger messenger = registrar.messenger();
+        Context context = registrar.context();
+        initPlugin(messenger, context);
+    }
+
+    private static void initPlugin(BinaryMessenger messenger, Context context) {
+        final MethodChannel channel = new MethodChannel(messenger, "plugins.ly.com/wifi");
+        WifiManager wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        final WifiDelegate delegate = new WifiDelegate( wifiManager);
         registrar.addRequestPermissionsResultListener(delegate);
 
         // support Android O,listen network disconnect event
@@ -31,19 +68,13 @@ public class WifiPlugin implements MethodCallHandler {
         IntentFilter filter = new IntentFilter();
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-        registrar
-                .context()
-                .registerReceiver(delegate.networkReceiver,filter);
-
-        channel.setMethodCallHandler(new WifiPlugin(registrar, delegate));
+        context.registerReceiver(delegate.networkReceiver, filter);
+        channel.setMethodCallHandler(new WifiPlugin());
     }
 
     @Override
-    public void onMethodCall(MethodCall call, Result result) {
-        if (registrar.activity() == null) {
-            result.error("no_activity", "wifi plugin requires a foreground activity.", null);
-            return;
-        }
+    public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
+
         switch (call.method) {
             case "ssid":
                 delegate.getSSID(call, result);
@@ -66,4 +97,19 @@ public class WifiPlugin implements MethodCallHandler {
         }
     }
 
+
+    @Override
+    public void onDetachedFromActivityForConfigChanges() {
+
+    }
+
+    @Override
+    public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) {
+
+    }
+
+    @Override
+    public void onDetachedFromActivity() {
+
+    }
 }
