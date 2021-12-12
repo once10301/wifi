@@ -1,7 +1,6 @@
 package com.ly.wifi;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -15,8 +14,6 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.util.Log;
-
-import androidx.core.app.ActivityCompat;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -38,44 +35,35 @@ WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
     private static final int REQUEST_CHANGE_WIFI_STATE_PERMISSION = 2;
     static final String TAG = "#####################";
     NetworkChangeReceiver networkReceiver;
-    private  Activity activity;
+    private final Context appContext;
     private final WifiManager wifiManager;
-    private final PermissionManager permissionManager;
+    private PermissionManager permissionManager;
     private MethodChannel.Result result;
     private MethodCall methodCall;
 
-    public WifiDelegate( final WifiManager wifiManager) {
-
-        this( wifiManager, null, null, new PermissionManager() {
-
-            @Override
-            public boolean isPermissionGranted(String permissionName) {
-                return ActivityCompat.checkSelfPermission(activity, permissionName)
-                        == PackageManager.PERMISSION_GRANTED;
-            }
-
-            @Override
-            public void askForPermission(String permissionName, int requestCode) {
-                ActivityCompat.requestPermissions(activity, new String[]{permissionName}, requestCode);
-            }
-        });
+    public WifiDelegate(final Context appContext, final WifiManager wifiManager) {
+        this(appContext, wifiManager, null, null);
     }
 
-    public void setActivity(Activity activity){
-        this.activity=activity;
-    }
     WifiDelegate(
-
+            Context activity,
             WifiManager wifiManager,
             MethodChannel.Result result,
-            MethodCall methodCall,
-            PermissionManager permissionManager) {
+            MethodCall methodCall) {
         this.networkReceiver = new NetworkChangeReceiver();
-
+        this.appContext = activity;
         this.wifiManager = wifiManager;
         this.result = result;
         this.methodCall = methodCall;
-        this.permissionManager = permissionManager;
+
+    }
+
+    public void setPermissionManager(PermissionManager manager) {
+        this.permissionManager = manager;
+    }
+
+    public boolean isPermissionManagerExist() {
+        return this.permissionManager != null;
     }
 
     private static String intIP2StringIP(int ip) {
@@ -139,7 +127,7 @@ WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
     }
 
     private void launchIP() {
-        NetworkInfo info = ((ConnectivityManager) activity
+        NetworkInfo info = ((ConnectivityManager) appContext
                 .getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
         if (info != null && info.isConnected()) {
             if (info.getType() == ConnectivityManager.TYPE_MOBILE) {
@@ -200,12 +188,12 @@ WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
                     level = 0;
                 }
                 HashMap<String, Object> maps = new HashMap<>();
-                if (key.isEmpty()) {
+                if (key != null && key.isEmpty()) {
                     maps.put("ssid", scanResult.SSID);
                     maps.put("level", level);
                     list.add(maps);
                 } else {
-                    if (scanResult.SSID.contains(key)) {
+                    if (key != null && scanResult.SSID.contains(key)) {
                         maps.put("ssid", scanResult.SSID);
                         maps.put("level", level);
                         list.add(maps);
@@ -302,7 +290,9 @@ WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
                 clearMethodCallAndResult();
 
             } else {
-                networkReceiver.connect(netId, ssid);
+                if (ssid != null) {
+                    networkReceiver.connect(netId, ssid);
+                }
             }
         }
     }
@@ -362,7 +352,8 @@ WifiDelegate implements PluginRegistry.RequestPermissionsResultListener {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            NetworkInfo info = intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
+            ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo info = connectivityManager.getActiveNetworkInfo();
             WifiInfo wifiInfo = wifiManager.getConnectionInfo();
 
             //check which wifi connectivity and verify ssid
